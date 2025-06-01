@@ -1,5 +1,8 @@
 import tkinter
 import os
+from cryptography.fernet import Fernet
+
+from main2 import fernet
 
 my_screen = tkinter.Tk()
 my_screen.title("Secret Notes")
@@ -13,17 +16,26 @@ def save_file():
     title_to_save = note_title_entry.get()
     text_to_save = secret_text.get("1.0",tkinter.END)
 
+    my_key = fernet.generate_key()
+    my_fernet = Fernet(my_key)
+
+    my_cipher_text = my_fernet.encrypt(text_to_save.encode())
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_dir,"my_secret.txt")
 
-    if not title_to_save or not text_to_save.strip():
+    if not title_to_save.strip() or not text_to_save.strip():
         result_label.config(text="Please fill both title and text.")
     else:
         try:
             with open(file_path,"a") as file:
-                file.write(title_to_save + ":\n")
-                file.write(text_to_save + "\n")
+                file.write(title_to_save.strip() + ":\n")
+                file.write(str(my_cipher_text.strip()) + "\n")
                 result_label.config(text="File saved successfully.")
+
+            secret_text.delete("1.0",tkinter.END)
+            secret_text.insert("1.0",my_cipher_text.decode())
+
         except Exception as e:
             result_label.config(text=f"Error: {e}\nFile could not be saved.")
 
