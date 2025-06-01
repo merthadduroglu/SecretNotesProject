@@ -20,12 +20,12 @@ def save_file():
         result_label.config(text="Please fill both title and text.")
     else:
         try:
-            with open(file_path,"w") as file:
+            with open(file_path,"a") as file:
                 file.write(title_to_save + ":\n")
-                file.write(text_to_save)
+                file.write(text_to_save + "\n")
                 result_label.config(text="File saved successfully.")
-        except:
-            result_label.config(text="Error: File could not be saved.")
+        except Exception as e:
+            result_label.config(text=f"Error: {e}\nFile could not be saved.")
 
 #ui objects
 try:
