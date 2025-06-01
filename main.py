@@ -1,8 +1,7 @@
 import tkinter
+from tkinter import messagebox
 import os
 from cryptography.fernet import Fernet
-
-from main2 import fernet
 
 my_screen = tkinter.Tk()
 my_screen.title("Secret Notes")
@@ -11,33 +10,36 @@ my_screen.minsize(width=400,height=730)
 
 #functions
 
-#save to file function
+#save encryption to file function
 def save_file():
     title_to_save = note_title_entry.get()
     text_to_save = secret_text.get("1.0",tkinter.END)
+    password_to_save = password_entry.get()
 
-    my_key = fernet.generate_key()
-    my_fernet = Fernet(my_key)
-
-    my_cipher_text = my_fernet.encrypt(text_to_save.encode())
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_dir,"my_secret.txt")
-
-    if not title_to_save.strip() or not text_to_save.strip():
-        result_label.config(text="Please fill both title and text.")
+    if not title_to_save.strip() or not text_to_save.strip() or not password_to_save.strip():
+        messagebox.showerror(title="Error!", message="Please fill all information.")
     else:
+
+        my_key = Fernet.generate_key()
+        my_fernet = Fernet(my_key)
+
+        my_cipher_text = my_fernet.encrypt(text_to_save.encode())
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(current_dir, "my_secret.txt")
+
         try:
             with open(file_path,"a") as file:
                 file.write(title_to_save.strip() + ":\n")
                 file.write(str(my_cipher_text.strip()) + "\n")
-                result_label.config(text="File saved successfully.")
+                messagebox.showinfo(message="File saved successfully.")
 
-            secret_text.delete("1.0",tkinter.END)
-            secret_text.insert("1.0",my_cipher_text.decode())
+            note_title_entry.delete(0, tkinter.END)
+            secret_text.delete("1.0", tkinter.END)
+            password_entry.delete(0, tkinter.END)
 
         except Exception as e:
-            result_label.config(text=f"Error: {e}\nFile could not be saved.")
+            messagebox.showerror(message=f"Error: {e}\nFile could not be saved.")
 
 #ui objects
 try:
